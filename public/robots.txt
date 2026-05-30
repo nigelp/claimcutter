@@ -1,0 +1,11 @@
+# claimcutter - UK Small Claims Helper
+# https://claimcutter.app
+
+User-agent: *
+Allow: /
+
+# Disallow access to API endpoints
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://claimcutter.app/sitemap.xml

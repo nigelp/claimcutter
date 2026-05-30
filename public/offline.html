@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ClaimCutter is currently offline">
+  <title>ClaimCutter - Offline</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f3f4f6;
+      color: #1f2937;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .container {
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      padding: 2rem;
+      max-width: 28rem;
+      width: 100%;
+      text-align: center;
+    }
+
+    .icon {
+      width: 4rem;
+      height: 4rem;
+      margin: 0 auto 1.5rem;
+      color: #6b7280;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #111827;
+    }
+
+    p {
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+      line-height: 1.625;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.625rem 1.25rem;
+      background-color: #1e40af;
+      color: white;
+      font-weight: 500;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.15s ease-in-out;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background-color: #1e3a8a;
+    }
+
+    .status {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e5e7eb;
+      font-size: 0.875rem;
+      color: #9ca3af;
+    }
+
+    .tips {
+      text-align: left;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .tips li {
+      position: relative;
+      color: #6b7280;
+      padding: 0.5rem 0 0.5rem 1.5rem;
+      list-style: none;
+    }
+
+    .tips li::before {
+      content: '\2713';
+      position: absolute;
+      left: 0;
+      color: #1e40af;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m0 0a18.01 18.01 0 01-4.243-1.698m6.072-8.201l-2.829-2.829M5.636 5.636a9 9 0 000 12.728m0 0l2.829-2.829m0 0a18.01 18.01 0 004.243-1.698m-6.072-8.201l2.829-2.829M12 9v4m0 4h.01" />
+    </svg>
+    <h1>You're Offline</h1>
+    <p>It looks like you've lost your internet connection. Don't worry - any progress you've made is safe. Please check your connection and try again.</p>
+    <button class="btn" onclick="window.location.reload()">Try Again</button>
+    <div class="tips">
+      <ul>
+        <li>Check your Wi-Fi or mobile data connection</li>
+        <li>Try refreshing the page once connected</li>
+        <li>Your saved data will be waiting for you</li>
+      </ul>
+    </div>
+    <div class="status">ClaimCutter will resume when you're back online</div>
+  </div>
+</body>
+</html>

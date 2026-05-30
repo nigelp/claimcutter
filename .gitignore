@@ -1,0 +1,7 @@
+.qpanda/
+node_modules/
+dist/
+dist-electron/
+release/
+coverage/
+*.log
