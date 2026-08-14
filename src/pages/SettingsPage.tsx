@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Moon, Sun, Download, Trash2, Shield, Info, Database, User, Clock, Edit2, Save, X } from 'lucide-react';
+import { Moon, Sun, Download, Upload, Trash2, Shield, Info, Database, User, Clock, Edit2, Save, X } from 'lucide-react';
 import { useAppStore } from '../store';
-import { exportAllData } from '../services/storage';
+import { exportAllData, importClaims } from '../services/storage';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { userProfileSchema, emptyUserProfile, type UserProfileSchema } from '../schemas';
 
@@ -15,6 +15,9 @@ export const SettingsPage = () => {
   const [clearProfileSuccess, setClearProfileSuccess] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [saveProfileSuccess, setSaveProfileSuccess] = useState(false);
+  const [importSuccess, setImportSuccess] = useState(false);
+  const [importError, setImportError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const profileForm = useForm<UserProfileSchema>({
     resolver: zodResolver(userProfileSchema),
@@ -53,6 +56,30 @@ export const SettingsPage = () => {
     URL.revokeObjectURL(url);
     setExportSuccess(true);
     setTimeout(() => setExportSuccess(false), 3000);
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportError('');
+    setImportSuccess(false);
+    try {
+      const data: unknown = JSON.parse(await file.text());
+      if (
+        !Array.isArray(data) ||
+        data.some((c) => !c || typeof (c as { id?: unknown }).id !== 'string')
+      ) {
+        throw new Error('Invalid file: expected a ClaimCutter export (JSON array of claims).');
+      }
+      await importClaims(data as Parameters<typeof importClaims>[0]);
+      await useAppStore.getState().loadClaims();
+      setImportSuccess(true);
+      setTimeout(() => setImportSuccess(false), 3000);
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Failed to import data.');
+    } finally {
+      e.target.value = '';
+    }
   };
 
   const handleDeleteAll = () => {
@@ -257,6 +284,18 @@ export const SettingsPage = () => {
                 <Download className="w-4 h-4 mr-2" />
                 Export All Data
               </button>
+              <button className="btn-secondary" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="w-4 h-4 mr-2" />
+                Import Data
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/json,.json"
+                onChange={handleImport}
+                className="hidden"
+                aria-label="Import data file"
+              />
               <button
                 onClick={handleClearUserProfile}
                 disabled={!userProfile}
@@ -307,6 +346,18 @@ export const SettingsPage = () => {
                 Data exported successfully!
               </div>
             )}
+
+            {importSuccess && (
+              <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300">
+                Data imported successfully!
+              </div>
+            )}
+
+            {importError && (
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm">
+                {importError}
+              </div>
+            )}
           </div>
         </div>
 
@@ -334,7 +385,7 @@ export const SettingsPage = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400">Fee data last verified</span>
-              <span className="font-medium">January 2024</span>
+              <span className="font-medium">April 2025</span>
             </div>
             <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
               <p className="text-sm text-gray-500 dark:text-gray-400">

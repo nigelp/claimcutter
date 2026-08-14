@@ -1,18 +1,5 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import { join } from 'path';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-
-const DATA_DIR = join(app.getPath('userData'), 'claim-data');
-
-function ensureDataDir() {
-  if (!existsSync(DATA_DIR)) {
-    mkdirSync(DATA_DIR, { recursive: true });
-  }
-}
-
-function getDataPath(key: string): string {
-  return join(DATA_DIR, `${key}.json`);
-}
 
 async function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -51,46 +38,6 @@ async function createWindow() {
 }
 
 // IPC Handlers
-ipcMain.handle('save-data', async (_event, key: string, data: unknown) => {
-  try {
-    ensureDataDir();
-    const filePath = getDataPath(key);
-    writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
-    return { success: true };
-  } catch (error) {
-    console.error('Error saving data:', error);
-    return { success: false, error: String(error) };
-  }
-});
-
-ipcMain.handle('load-data', async (_event, key: string) => {
-  try {
-    const filePath = getDataPath(key);
-    if (!existsSync(filePath)) {
-      return { success: true, data: null };
-    }
-    const content = readFileSync(filePath, 'utf-8');
-    return { success: true, data: JSON.parse(content) };
-  } catch (error) {
-    console.error('Error loading data:', error);
-    return { success: false, error: String(error), data: null };
-  }
-});
-
-ipcMain.handle('delete-data', async (_event, key: string) => {
-  try {
-    const filePath = getDataPath(key);
-    if (existsSync(filePath)) {
-      const { unlinkSync } = require('fs');
-      unlinkSync(filePath);
-    }
-    return { success: true };
-  } catch (error) {
-    console.error('Error deleting data:', error);
-    return { success: false, error: String(error) };
-  }
-});
-
 ipcMain.handle('get-platform', () => {
   return process.platform;
 });

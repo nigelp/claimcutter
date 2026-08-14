@@ -92,6 +92,13 @@ export interface MediationStatus {
   scheduledDate?: string;
   completed: boolean;
   outcome?: 'settled' | 'not_settled' | 'refused';
+  positionStatement?: {
+    summary: string;
+    desiredOutcome: string;
+    compromises: string;
+    keyEvidence: string;
+  };
+  preparationChecklist?: string[];
 }
 
 export interface HearingDetails {

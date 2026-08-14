@@ -1,10 +1,70 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Info, FileText, Lightbulb, ArrowRight, Download } from 'lucide-react';
+import { useAppStore } from '../store';
+import { CheckCircle, Info, FileText, Lightbulb, ArrowRight, Download, Save } from 'lucide-react';
+
+const PREP_ITEMS: { id: string; label: string }[] = [
+  { id: 'reviewEvidence', label: 'Review all your evidence and documents' },
+  { id: 'knowOutcome', label: 'Know exactly what you want to achieve' },
+  { id: 'considerCompromise', label: 'Consider what you are willing to compromise on' },
+  { id: 'prepareSummary', label: 'Prepare a brief summary of your case' },
+  { id: 'listKeyPoints', label: 'List your key points in priority order' },
+  { id: 'otherPerspective', label: "Think about the other party's perspective" },
+  { id: 'bringDocuments', label: 'Bring copies of all relevant documents' },
+  { id: 'beFlexible', label: 'Be prepared to listen and be flexible' },
+];
 
 export const MediationPage = () => {
   const navigate = useNavigate();
+  const { claims, currentClaimId, saveCurrentClaim } = useAppStore();
+  const currentClaim = claims.find((c) => c.id === currentClaimId);
+
   const [activeTab, setActiveTab] = useState<'overview' | 'prepare' | 'statement'>('overview');
+  const [summary, setSummary] = useState('');
+  const [desiredOutcome, setDesiredOutcome] = useState('');
+  const [compromises, setCompromises] = useState('');
+  const [keyEvidence, setKeyEvidence] = useState('');
+  const [prepChecklist, setPrepChecklist] = useState<string[]>([]);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    const ms = currentClaim?.mediationStatus;
+    if (ms?.positionStatement) {
+      setSummary(ms.positionStatement.summary || '');
+      setDesiredOutcome(ms.positionStatement.desiredOutcome || '');
+      setCompromises(ms.positionStatement.compromises || '');
+      setKeyEvidence(ms.positionStatement.keyEvidence || '');
+    }
+    if (ms?.preparationChecklist) {
+      setPrepChecklist(ms.preparationChecklist);
+    }
+  }, [currentClaim?.id]);
+
+  const saveMediation = async (checklist: string[]) => {
+    if (!currentClaim) return;
+    await saveCurrentClaim({
+      ...currentClaim,
+      mediationStatus: {
+        ...(currentClaim.mediationStatus ?? { offered: false, accepted: false, completed: false }),
+        positionStatement: { summary, desiredOutcome, compromises, keyEvidence },
+        preparationChecklist: checklist,
+      },
+    });
+  };
+
+  const handleSave = async () => {
+    await saveMediation(prepChecklist);
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
+  };
+
+  const toggleChecklistItem = (id: string) => {
+    const next = prepChecklist.includes(id)
+      ? prepChecklist.filter((x) => x !== id)
+      : [...prepChecklist, id];
+    setPrepChecklist(next);
+    void saveMediation(next);
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -12,6 +72,12 @@ export const MediationPage = () => {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Mediation</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">Resolve your dispute through free mediation before going to court</p>
       </div>
+
+      {!currentClaim && (
+        <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-800 dark:text-amber-200">
+          No claim selected — your position statement and checklist will not be saved until you start or select a claim.
+        </div>
+      )}
 
       <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
         {(['overview', 'prepare', 'statement'] as const).map(tab => (
@@ -111,23 +177,19 @@ export const MediationPage = () => {
             <div className="mb-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
               <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
                 <ArrowRight className="w-4 h-4" />
-                <span>Checked items will be included in your Position Statement</span>
+                <span>Checked items are saved to the current claim</span>
               </div>
             </div>
             <div className="space-y-3">
-              {[
-                'Review all your evidence and documents',
-                'Know exactly what you want to achieve',
-                'Consider what you are willing to compromise on',
-                'Prepare a brief summary of your case',
-                'List your key points in priority order',
-                'Think about the other party\'s perspective',
-                'Bring copies of all relevant documents',
-                'Be prepared to listen and be flexible',
-              ].map((item, i) => (
-                <label key={i} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer group">
-                  <input type="checkbox" className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
-                  <span className="text-gray-700 dark:text-gray-300">{item}</span>
+              {PREP_ITEMS.map((item) => (
+                <label key={item.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={prepChecklist.includes(item.id)}
+                    onChange={() => toggleChecklistItem(item.id)}
+                    className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  />
+                  <span className="text-gray-700 dark:text-gray-300">{item.label}</span>
                   <FileText className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
                 </label>
               ))}
@@ -160,31 +222,31 @@ export const MediationPage = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Brief Summary of the Dispute
               </label>
-              <textarea className="input-field" rows={4} placeholder="Explain what happened and why you are making this claim..." />
+              <textarea className="input-field" rows={4} placeholder="Explain what happened and why you are making this claim..." value={summary} onChange={(e) => setSummary(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 What You Want to Achieve
               </label>
-              <textarea className="input-field" rows={3} placeholder="Describe your ideal outcome..." />
+              <textarea className="input-field" rows={3} placeholder="Describe your ideal outcome..." value={desiredOutcome} onChange={(e) => setDesiredOutcome(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 What You Are Willing to Compromise On
               </label>
-              <textarea className="input-field" rows={3} placeholder="List areas where you could be flexible..." />
+              <textarea className="input-field" rows={3} placeholder="List areas where you could be flexible..." value={compromises} onChange={(e) => setCompromises(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Key Evidence Summary
               </label>
-              <textarea className="input-field" rows={3} placeholder="Summarise your strongest evidence..." />
+              <textarea className="input-field" rows={3} placeholder="Summarise your strongest evidence..." value={keyEvidence} onChange={(e) => setKeyEvidence(e.target.value)} />
             </div>
           </div>
 
           <div className="mt-6 flex gap-3">
-            <button className="btn-primary">
-              <FileText className="w-4 h-4 mr-2" />
+            <button className="btn-primary" onClick={handleSave} disabled={!currentClaim}>
+              <Save className="w-4 h-4 mr-2" />
               Save Position Statement
             </button>
             <button className="btn-secondary" onClick={() => window.print()}>
@@ -192,6 +254,12 @@ export const MediationPage = () => {
               Print / Download
             </button>
           </div>
+
+          {saveSuccess && (
+            <div className="mt-4 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 text-sm">
+              Position statement and checklist saved to the current claim.
+            </div>
+          )}
         </div>
       )}
 

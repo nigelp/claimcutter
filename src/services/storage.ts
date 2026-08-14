@@ -39,10 +39,6 @@ async function getDB(): Promise<IDBPDatabase<claimcutterDB>> {
 export async function saveClaim(claim: Claim): Promise<void> {
   const database = await getDB();
   await database.put('claims', claim);
-  
-  if (window.electronAPI) {
-    await window.electronAPI.saveData(`claim-${claim.id}`, claim);
-  }
 }
 
 export async function getClaim(id: string): Promise<Claim | undefined> {
@@ -58,10 +54,6 @@ export async function getAllClaims(): Promise<Claim[]> {
 export async function deleteClaim(id: string): Promise<void> {
   const database = await getDB();
   await database.delete('claims', id);
-  
-  if (window.electronAPI) {
-    await window.electronAPI.deleteData(`claim-${id}`);
-  }
 }
 
 export async function saveSetting<T>(key: string, value: T): Promise<void> {

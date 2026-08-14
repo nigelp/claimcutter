@@ -250,7 +250,7 @@ export default function FeeCalculatorPage() {
                 </td>
                 <td className="px-4 py-3 text-right text-gray-900 dark:text-white">5%</td>
                 <td className="px-4 py-3 text-right text-gray-900 dark:text-white">5%</td>
-                <td className="px-4 py-3 text-right text-gray-900 dark:text-white">£335</td>
+                <td className="px-4 py-3 text-right text-gray-900 dark:text-white">£171</td>
               </tr>
             </tbody>
           </table>
