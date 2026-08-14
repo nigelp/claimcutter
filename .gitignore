@@ -1,5 +1,6 @@
 .qpanda/
 .reasonix/
+.netlify/
 node_modules/
 dist/
 dist-electron/
