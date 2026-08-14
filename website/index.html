@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Cutter — File Small Claims in the UK</title>
+    <meta name="description" content="Claim Cutter makes it easy to file small claims for money owed to you. Free step-by-step guidance, letter generation, and fee calculation.">
+    <link rel="icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" sizes="96x96" href="favicon-96x96.png">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --accent: #06b6d4;
+            --dark: #0f172a;
+            --gray-900: #1e293b;
+            --gray-700: #334155;
+            --gray-500: #64748b;
+            --gray-300: #cbd5e1;
+            --gray-100: #f1f5f9;
+            --white: #ffffff;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--gray-900);
+            background: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--gray-300);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        .nav-cta {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .nav-cta:hover { background: var(--primary-dark); }
+
+        .hero {
+            padding: 10rem 2rem 6rem;
+            text-align: center;
+            background: linear-gradient(180deg, var(--gray-100) 0%, var(--white) 100%);
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.35rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--gray-500);
+            max-width: 540px;
+            margin: 0 auto 2.5rem;
+        }
+        .hero-image {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.9rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.35);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(37, 99, 235, 0.45);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--gray-700);
+            padding: 0.9rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            border: 1.5px solid var(--gray-300);
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .screenshots {
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .screenshots h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--dark);
+        }
+
+        .screenshots > p {
+            color: var(--gray-500);
+            margin-bottom: 3rem;
+            font-size: 1.05rem;
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .screenshot-card {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--gray-300);
+            transition: transform 0.3s, box-shadow 0.3s;
+            background: var(--white);
+        }
+
+        .screenshot-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .screenshot-card { cursor: pointer; }
+
+        .screenshot-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .lightbox-overlay.active { display: flex; }
+
+        .lightbox-overlay img {
+            max-width: 90vw;
+            max-height: 440px;
+            border-radius: 12px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            cursor: default;
+        }
+
+        .lightbox-close {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            z-index: 10000;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .lightbox-close:hover { color: var(--accent); }
+
+        .features {
+            padding: 5rem 2rem;
+            background: var(--gray-100);
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .features > p {
+            text-align: center;
+            color: var(--gray-500);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            font-size: 1.05rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--gray-300);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .feature-card p {
+            color: var(--gray-500);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .download-cta {
+            padding: 6rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--gray-900) 100%);
+            color: white;
+        }
+
+        .download-cta h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .download-cta p {
+            color: var(--gray-300);
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .download-cta .btn-primary {
+            font-size: 1.15rem;
+            padding: 1rem 2.5rem;
+        }
+
+        .requirements {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--gray-500);
+        }
+
+        footer {
+            padding: 2.5rem 2rem;
+            text-align: center;
+            color: var(--gray-500);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--gray-300);
+        }
+
+        @media (max-width: 640px) {
+            .hero { padding: 8rem 1.5rem 4rem; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            .screenshots h2, .features h2, .download-cta h2 { font-size: 1.6rem; }
+            .screenshot-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#" class="logo">
+            <div class="logo-icon">CC</div>
+            Claim Cutter
+        </a>
+        <a href="#download" class="nav-cta">Download</a>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-badge">Free UK Small Claims Tool</div>
+        <h1>Get the Money<br>You're <span>Owed</span></h1>
+        <p>Everything you need to make a small claim. Our free tools guide you through each step, helping you save time and avoid common mistakes.</p>
+        <div class="hero-image"><img src="images/claimcutterweb6hero.jpg" alt="Claim Cutter interface" loading="lazy"></div>
+
+        <div class="hero-buttons">
+            <a href="#download" class="btn-primary">&#8681; Download Free</a>
+            <a href="#screenshots" class="btn-secondary">See It in Action</a>
+        </div>
+    </section>
+
+    <section class="screenshots" id="screenshots">
+        <h2>See It in Action</h2>
+        <p>Clear guidance from start to finish.</p>
+        <div class="screenshot-grid">
+            <div class="screenshot-card">
+                <img src="images/claimcutterweb.jpg" alt="Claim Cutter main interface" loading="lazy">
+            </div>
+            <div class="screenshot-card">
+                <img src="images/claimcutterweb3start.jpg" alt="Claim Cutter start screen" loading="lazy">
+            </div>
+            <div class="screenshot-card">
+                <img src="images/claimcutterweb4enf.jpg" alt="Claim Cutter fee calculator" loading="lazy">
+            </div>
+            <div class="screenshot-card">
+                <img src="images/claimcutterweb5fee.jpg" alt="Claim Cutter fee breakdown" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <h2>Everything You Need to Make a Small Claim</h2>
+        <p>Our free tools guide you through each step of the small claims process, helping you save time and avoid common mistakes.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Step-by-step Guidance</h3>
+                <p>Clear, simple instructions to help you navigate the small claims process from start to finish.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>Claim Tracking</h3>
+                <p>Track your claim progress and get reminders for important deadlines and actions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">✉️</div>
+                <h3>Letter Generation</h3>
+                <p>Automatically generate your Letter Before Action with all the required legal information.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3>Fee Calculation</h3>
+                <p>Calculate court fees and interest automatically based on your claim amount.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="download-cta" id="download">
+        <h2>Ready to File Your Claim?</h2>
+        <p>Download Claim Cutter and start your small claim in under a minute.</p>
+        <a href="https://github.com/nigelp/claimcutter/releases/download/v1.1.0/claimcutter.Setup.1.1.0.exe" class="btn-primary">&#8681; Download for Windows</a>
+        <p class="requirements">or <a href="https://github.com/nigelp/claimcutter/releases/download/v1.1.0/claimcutter-1.1.0-portable.exe" style="color: var(--primary); text-decoration: underline;">portable version (no install)</a> &middot; Windows 10/11 &middot; Free &middot; No account required</p>
+    </section>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox">
+        <button class="lightbox-close" id="lightbox-close">&times;</button>
+        <img src="" alt="Screenshot" id="lightbox-img">
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Claim Cutter. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxClose = document.getElementById('lightbox-close');
+
+        document.querySelectorAll('.screenshot-card img').forEach(img => {
+            img.addEventListener('click', () => {
+                lightboxImg.src = img.src;
+                lightboxImg.alt = img.alt;
+                lightbox.classList.add('active');
+            });
+        });
+
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox || e.target === lightboxClose) {
+                lightbox.classList.remove('active');
+                lightboxImg.src = '';
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                lightbox.classList.remove('active');
+                lightboxImg.src = '';
+            }
+        });
+    </script>
+</body>
+</html>

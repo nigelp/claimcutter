@@ -6,6 +6,10 @@
   "main": "dist-electron/main.js",
   "author": "claimcutter Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nigelp/claimcutter.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -17,7 +21,8 @@
     "electron:build": "vite build && electron-builder",
     "electron:build:win": "vite build && electron-builder --win",
     "electron:build:mac": "vite build && electron-builder --mac",
-    "electron:build:linux": "vite build && electron-builder --linux"
+    "electron:build:linux": "vite build && electron-builder --linux",
+    "release:win": "vite build && electron-builder --win --publish always"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -71,6 +76,13 @@
     "files": [
       "dist/**/*",
       "dist-electron/**/*"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "nigelp",
+        "repo": "claimcutter"
+      }
     ],
     "win": {
       "target": [
