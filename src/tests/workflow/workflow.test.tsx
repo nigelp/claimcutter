@@ -442,4 +442,72 @@ describe('ClaimCutter workflows', () => {
       expect(useAppStore.getState().claims[0].status).toBe('letter_sent');
     });
   }, 15000);
+
+  test('deletes a claim from previous claims with confirmation', async () => {
+    const user = userEvent.setup();
+    const claim = sampleClaim();
+    renderApp('/claims', [claim]);
+    await acceptDisclaimer(user);
+
+    expect(await screen.findByRole('heading', { name: /Previous Claims/i })).toBeInTheDocument();
+    expect(screen.getByText('Bob Defendant')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Delete claim against Bob Defendant/i }));
+    expect(screen.getByText(/Delete this claim\?/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /^Delete$/i }));
+
+    await waitFor(() => {
+      expect(storageMocks.deleteClaim).toHaveBeenCalledWith('claim-1');
+    });
+    expect(useAppStore.getState().claims).toHaveLength(0);
+    expect(screen.getByText(/No claims yet/i)).toBeInTheDocument();
+  });
+
+  test('persists mediation position statement and checklist to the claim', async () => {
+    const user = userEvent.setup();
+    const claim = sampleClaim();
+    renderApp('/mediation', [claim]);
+    await acceptDisclaimer(user);
+
+    expect(await screen.findByRole('heading', { name: /^Mediation$/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'prepare' }));
+    await user.click(screen.getByRole('checkbox', { name: /Review all your evidence and documents/i }));
+
+    await user.click(screen.getByRole('button', { name: 'statement' }));
+    await user.type(
+      screen.getByPlaceholderText(/Explain what happened and why you are making this claim/i),
+      'We disputed the invoice amount after the work was not completed.'
+    );
+
+    await user.click(screen.getByRole('button', { name: /Save Position Statement/i }));
+
+    await waitFor(() => {
+      const saved = useAppStore.getState().claims.find((c) => c.id === 'claim-1');
+      expect(saved?.mediationStatus?.positionStatement?.summary).toBe(
+        'We disputed the invoice amount after the work was not completed.'
+      );
+      expect(saved?.mediationStatus?.preparationChecklist).toContain('reviewEvidence');
+    });
+    expect(await screen.findByText(/saved to the current claim/i)).toBeInTheDocument();
+  });
+
+  test('imports claims from a JSON file in settings', async () => {
+    const user = userEvent.setup();
+    renderApp('/settings');
+    await acceptDisclaimer(user);
+
+    const input = screen.getByLabelText('Import data file');
+    const file = new File([JSON.stringify([sampleClaim()])], 'export.json', { type: 'application/json' });
+    await user.upload(input, file);
+
+    await waitFor(() => {
+      expect(storageMocks.importClaims).toHaveBeenCalled();
+    });
+    const imported = storageMocks.importClaims.mock.calls[0][0] as Claim[];
+    expect(imported).toHaveLength(1);
+    expect(imported[0].id).toBe('claim-1');
+    expect(await screen.findByText(/Data imported successfully/i)).toBeInTheDocument();
+  });
 });

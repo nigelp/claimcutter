@@ -7,6 +7,15 @@ import { exportAllData, importClaims } from '../services/storage';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { userProfileSchema, emptyUserProfile, type UserProfileSchema } from '../schemas';
 
+function readFileAsText(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error ?? new Error('Failed to read file'));
+    reader.readAsText(file);
+  });
+}
+
 export const SettingsPage = () => {
   const { darkMode, setDarkMode, claims, userProfile, setUserProfile, clearUserProfile } = useAppStore();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
@@ -64,7 +73,7 @@ export const SettingsPage = () => {
     setImportError('');
     setImportSuccess(false);
     try {
-      const data: unknown = JSON.parse(await file.text());
+      const data: unknown = JSON.parse(await readFileAsText(file));
       if (
         !Array.isArray(data) ||
         data.some((c) => !c || typeof (c as { id?: unknown }).id !== 'string')
