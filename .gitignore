@@ -1,4 +1,5 @@
 .qpanda/
+.reasonix/
 node_modules/
 dist/
 dist-electron/

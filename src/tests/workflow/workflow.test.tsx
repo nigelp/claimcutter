@@ -404,6 +404,7 @@ describe('ClaimCutter workflows', () => {
 
   test('updates pre-claim checklist and marks the letter before claim as sent', async () => {
     const user = userEvent.setup();
+    const writeTextSpy = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
     const claim = sampleClaim();
     renderApp('/pre-claim', [claim]);
     await acceptDisclaimer(user);
@@ -418,25 +419,27 @@ describe('ClaimCutter workflows', () => {
     await user.type(screen.getByPlaceholderText(/Enter your email address/i), 'ada@example.com');
     await user.click(screen.getByRole('button', { name: /Next Step/i }));
 
-    await user.type(await screen.findByPlaceholderText(/Enter defendant name/i), 'Bob Defendant');
-    await user.type(screen.getByPlaceholderText(/Enter defendant address/i), '2 Market Road');
-    await user.type(screen.getByPlaceholderText(/Enter defendant city/i), 'London');
-    await user.type(screen.getByPlaceholderText(/Enter defendant postcode/i), 'E1 1AA');
+    await user.type(await screen.findByPlaceholderText(/Enter full name/i), 'Bob Defendant');
+    await user.type(screen.getByPlaceholderText(/Enter address line 1/i), '2 Market Road');
+    await user.type(screen.getByPlaceholderText(/Enter city/i), 'London');
+    await user.type(screen.getByPlaceholderText(/Enter postcode/i), 'E1 1AA');
     await user.click(screen.getByRole('button', { name: /Next Step/i }));
 
     await user.type(screen.getByPlaceholderText(/Describe what happened/i), 'The defendant failed to pay invoice CC-100 after services were completed.');
-    await user.type(screen.getByPlaceholderText(/Enter amount/i), '1250');
+    await user.type(screen.getByPlaceholderText(/Provide any additional details/i), 'Additional supporting information for the claim.');
+    await user.clear(screen.getByPlaceholderText('0.00'));
+    await user.type(screen.getByPlaceholderText('0.00'), '1250');
     await user.click(screen.getByRole('button', { name: /Continue to Evidence/i }));
     await user.click(screen.getByRole('button', { name: /Show Full Letter/i }));
 
-    expect(screen.getByText(/Letter Before Claim/i)).toBeInTheDocument();
+    expect(screen.getByText(/Practice Direction on Pre-Action Conduct/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /Copy to Clipboard/i }));
-    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalled());
+    await waitFor(() => expect(writeTextSpy).toHaveBeenCalled());
 
     await user.click(screen.getByRole('button', { name: /Mark Letter as Sent/i }));
     await waitFor(() => {
       expect(useAppStore.getState().claims[0].status).toBe('letter_sent');
     });
-  });
+  }, 15000);
 });

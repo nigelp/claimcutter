@@ -52,6 +52,7 @@ interface AppState {
   getCurrentClaim: () => Promise<Claim | undefined>;
   deleteClaim: (id: string) => Promise<void>;
   createNewClaim: () => Claim;
+  ensureCurrentClaim: () => Promise<Claim>;
   updateClaimStatus: (id: string, status: ClaimStatus) => Promise<void>;
   updateHearingDetails: (id: string, details: Partial<HearingDetails>) => Promise<void>;
 }
@@ -166,9 +167,14 @@ export const useAppStore = create<AppState>()(
       saveCurrentClaim: async (claim) => {
         const updatedClaim = { ...claim, updatedAt: new Date().toISOString() };
         await saveClaim(updatedClaim);
-        set((state) => ({
-          claims: state.claims.map((c) => (c.id === updatedClaim.id ? updatedClaim : c)),
-        }));
+        set((state) => {
+          const exists = state.claims.some((c) => c.id === updatedClaim.id);
+          return {
+            claims: exists
+              ? state.claims.map((c) => (c.id === updatedClaim.id ? updatedClaim : c))
+              : [updatedClaim, ...state.claims],
+          };
+        });
       },
       
       getCurrentClaim: async () => {
@@ -189,6 +195,22 @@ export const useAppStore = create<AppState>()(
         const newClaim = createEmptyClaim(get().userProfile);
         set((state) => ({
           claims: [newClaim, ...state.claims],
+          currentClaimId: newClaim.id,
+        }));
+        void saveClaim(newClaim);
+        return newClaim;
+      },
+
+      ensureCurrentClaim: async () => {
+        const { currentClaimId } = get();
+        if (currentClaimId) {
+          const existing = await getClaim(currentClaimId);
+          if (existing) return existing;
+        }
+        const newClaim = createEmptyClaim(get().userProfile);
+        await saveClaim(newClaim);
+        set((state) => ({
+          claims: [newClaim, ...state.claims.filter((c) => c.id !== newClaim.id)],
           currentClaimId: newClaim.id,
         }));
         return newClaim;

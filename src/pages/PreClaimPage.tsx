@@ -101,7 +101,7 @@ export default function PreClaimPage() {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { saveCurrentClaim, getCurrentClaim, userProfile, updateUserProfile, eligibilityAnswers } = useAppStore();
+  const { saveCurrentClaim, ensureCurrentClaim, userProfile, updateUserProfile, eligibilityAnswers } = useAppStore();
 
   const claimantForm = useForm<ClaimantFormData>({
     resolver: claimantResolver,
@@ -128,56 +128,58 @@ export default function PreClaimPage() {
 
   useEffect(() => {
     const loadClaimData = async () => {
-      const claim = await getCurrentClaim();
-      if (claim) {
-        claimantForm.reset({
-          fullName: claim.claimant.fullName,
-          address: claim.claimant.address,
-          phone: claim.claimant.phone,
-          email: claim.claimant.email,
-        });
-        defendantForm.reset({
-          type: claim.defendant.type,
-          fullName: claim.defendant.fullName,
-          companyName: claim.defendant.companyName || '',
-          address: claim.defendant.address,
-          email: claim.defendant.email || '',
-        });
-        claimDetailsForm.reset({
-          whatHappened: claim.particularsOfClaim,
-          amountOwed: claim.claimAmount || eligibilityAnswers.claimAmount || 0,
-          description: claim.particularsOfClaim,
-          breachDate: claim.interest.startDate || format(new Date(), 'yyyy-MM-dd'),
-        });
-        setChecklist(claim.preActionChecklist);
-        setLetterSent(claim.letterBeforeClaim.sent);
-        setLetterSentDate(claim.letterBeforeClaim.sentDate || '');
-        if (claim.documents && claim.documents.length > 0) {
-          setEvidenceFiles(claim.documents.map(doc => ({
-            id: doc.id,
-            name: doc.name,
-            type: doc.type,
-            category: doc.category as EvidenceFile['category'],
-            data: doc.data || '',
-            size: 0,
-            addedAt: doc.uploadedAt,
-          })));
-        }
+      const claim = await ensureCurrentClaim();
+      claimantForm.reset({
+        fullName: claim.claimant.fullName,
+        address: claim.claimant.address,
+        phone: claim.claimant.phone,
+        email: claim.claimant.email,
+      });
+      defendantForm.reset({
+        type: claim.defendant.type,
+        fullName: claim.defendant.fullName,
+        companyName: claim.defendant.companyName || '',
+        address: claim.defendant.address,
+        email: claim.defendant.email || '',
+      });
+      claimDetailsForm.reset({
+        whatHappened: claim.particularsOfClaim,
+        amountOwed: claim.claimAmount || eligibilityAnswers.claimAmount || 0,
+        description: claim.particularsOfClaim,
+        breachDate: claim.interest.startDate || eligibilityAnswers.breachDate || format(new Date(), 'yyyy-MM-dd'),
+      });
+      setChecklist(claim.preActionChecklist);
+      setLetterSent(claim.letterBeforeClaim.sent);
+      setLetterSentDate(claim.letterBeforeClaim.sentDate || '');
+      if (claim.documents && claim.documents.length > 0) {
+        setEvidenceFiles(claim.documents.map(doc => ({
+          id: doc.id,
+          name: doc.name,
+          type: doc.type,
+          category: doc.category as EvidenceFile['category'],
+          data: doc.data || '',
+          size: 0,
+          addedAt: doc.uploadedAt,
+        })));
       }
-      const claimantFullName = claim?.claimant?.fullName ?? '';
+      const claimantFullName = claim.claimant.fullName;
       const isFormDirty = Object.keys(claimantForm.formState.dirtyFields).length > 0;
-      if (!claimantFullName && !isFormDirty && userProfile) {
-        claimantForm.reset({
-          fullName: userProfile.fullName,
-          address: userProfile.address,
-          phone: userProfile.phone,
-          email: userProfile.email,
-        });
-        setAutoFilledFields(new Set(['fullName', 'address.line1', 'address.line2', 'address.city', 'address.county', 'address.postcode', 'phone', 'email']));
+      if (!isFormDirty && userProfile) {
+        if (!claimantFullName) {
+          claimantForm.reset({
+            fullName: userProfile.fullName,
+            address: userProfile.address,
+            phone: userProfile.phone,
+            email: userProfile.email,
+          });
+        }
+        if (!claimantFullName || claimantFullName === userProfile.fullName) {
+          setAutoFilledFields(new Set(['fullName', 'address.line1', 'address.line2', 'address.city', 'address.county', 'address.postcode', 'phone', 'email']));
+        }
       }
     };
     loadClaimData();
-  }, [userProfile]);
+  }, []);
 
   const letterDate = useMemo(() => {
     return letterSentDate ? parseISO(letterSentDate) : new Date();
@@ -196,14 +198,11 @@ export default function PreClaimPage() {
 
   const handleClaimantNext = () => {
     claimantForm.handleSubmit(async (claimantData) => {
-      const claim = await getCurrentClaim();
-      if (claim) {
-        const updatedClaim = {
-          ...claim,
-          claimant: claimantData,
-        };
-        await saveCurrentClaim(updatedClaim);
-      }
+      const claim = await ensureCurrentClaim();
+      await saveCurrentClaim({
+        ...claim,
+        claimant: claimantData,
+      });
       updateUserProfile(claimantToUserProfile(claimantData));
       setCurrentStep(2);
     })();
@@ -211,18 +210,15 @@ export default function PreClaimPage() {
 
   const handleDefendantNext = () => {
     defendantForm.handleSubmit(async (defendantData) => {
-      const claim = await getCurrentClaim();
-      if (claim) {
-        const updatedClaim = {
-          ...claim,
-          defendant: {
-            ...defendantData,
-            phone: defendantData.phone || '',
-            email: defendantData.email || '',
-          },
-        };
-        await saveCurrentClaim(updatedClaim);
-      }
+      const claim = await ensureCurrentClaim();
+      await saveCurrentClaim({
+        ...claim,
+        defendant: {
+          ...defendantData,
+          phone: defendantData.phone || '',
+          email: defendantData.email || '',
+        },
+      });
       setCurrentStep(3);
     })();
   };
@@ -244,29 +240,27 @@ export default function PreClaimPage() {
 
   const handleClaimDetailsNext = () => {
     claimDetailsForm.handleSubmit(async () => {
-      const claim = await getCurrentClaim();
-      if (claim) {
-        const claimantData = claimantForm.getValues();
-        const defendantData = defendantForm.getValues();
-        const updatedClaim = {
-          ...claim,
-          claimant: claimantData,
-          defendant: {
-            ...defendantData,
-            address: defendantData.address,
-            phone: defendantData.phone || '',
-            email: defendantData.email || '',
-          },
-          claimAmount: claimDetailsForm.getValues().amountOwed,
-          particularsOfClaim: claimDetailsForm.getValues().whatHappened,
-          interest: {
-            ...claim.interest,
-            startDate: claimDetailsForm.getValues().breachDate,
-          },
-        };
-        updateUserProfile(claimantToUserProfile(claimantData));
-        await saveCurrentClaim(updatedClaim);
-      }
+      const claim = await ensureCurrentClaim();
+      const claimantData = claimantForm.getValues();
+      const defendantData = defendantForm.getValues();
+      const updatedClaim = {
+        ...claim,
+        claimant: claimantData,
+        defendant: {
+          ...defendantData,
+          address: defendantData.address,
+          phone: defendantData.phone || '',
+          email: defendantData.email || '',
+        },
+        claimAmount: claimDetailsForm.getValues().amountOwed,
+        particularsOfClaim: claimDetailsForm.getValues().whatHappened,
+        interest: {
+          ...claim.interest,
+          startDate: claimDetailsForm.getValues().breachDate,
+        },
+      };
+      updateUserProfile(claimantToUserProfile(claimantData));
+      await saveCurrentClaim(updatedClaim);
       setCurrentStep(4);
     })();
   };
@@ -291,27 +285,25 @@ export default function PreClaimPage() {
         });
         if (newFiles.length === files.length) {
           setEvidenceFiles(prev => [...prev, ...newFiles]);
-          getCurrentClaim().then((claim) => {
-            if (claim) {
-              const documents = newFiles.map((f) => ({
-                id: f.id,
-                name: f.name,
-                type: f.type,
-                category: f.category,
-                data: f.data,
-                uploadedAt: f.addedAt,
-              }));
-              saveCurrentClaim({
-                ...claim,
-                documents: [...(claim.documents || []), ...documents],
-              });
-            }
+          ensureCurrentClaim().then((claim) => {
+            const documents = newFiles.map((f) => ({
+              id: f.id,
+              name: f.name,
+              type: f.type,
+              category: f.category,
+              data: f.data,
+              uploadedAt: f.addedAt,
+            }));
+            saveCurrentClaim({
+              ...claim,
+              documents: [...(claim.documents || []), ...documents],
+            });
           });
         }
       };
       reader.readAsDataURL(file);
     }
-  }, [getCurrentClaim, saveCurrentClaim]);
+  }, [ensureCurrentClaim, saveCurrentClaim]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -334,7 +326,13 @@ export default function PreClaimPage() {
 
   const removeFile = useCallback((id: string) => {
     setEvidenceFiles(prev => prev.filter(f => f.id !== id));
-  }, []);
+    ensureCurrentClaim().then((claim) => {
+      saveCurrentClaim({
+        ...claim,
+        documents: (claim.documents || []).filter((d) => d.id !== id),
+      });
+    });
+  }, [ensureCurrentClaim, saveCurrentClaim]);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '';
@@ -348,34 +346,32 @@ export default function PreClaimPage() {
     setLetterSentDate(format(new Date(), 'yyyy-MM-dd'));
     setChecklist((prev) => ({ ...prev, letterBeforeClaimSent: true }));
 
-    const claim = await getCurrentClaim();
-    if (claim) {
-      const deadline = addDays(new Date(), claim.defendant.type === 'company' ? 30 : 14);
-      const updatedClaim = {
-        ...claim,
-        letterBeforeClaim: {
-          ...claim.letterBeforeClaim,
-          sent: true,
-          sentDate: format(new Date(), 'yyyy-MM-dd'),
-          responseDeadline: format(deadline, 'yyyy-MM-dd'),
-        },
-        preActionChecklist: {
-          ...claim.preActionChecklist,
-          letterBeforeClaimSent: true,
-        },
-        status: 'letter_sent' as const,
-      };
-      await saveCurrentClaim(updatedClaim);
-    }
+    const claim = await ensureCurrentClaim();
+    const defendantType = defendantForm.getValues().type || claim.defendant.type;
+    const deadline = addDays(new Date(), defendantType === 'company' ? 30 : 14);
+    const updatedClaim = {
+      ...claim,
+      letterBeforeClaim: {
+        ...claim.letterBeforeClaim,
+        sent: true,
+        sentDate: format(new Date(), 'yyyy-MM-dd'),
+        responseDeadline: format(deadline, 'yyyy-MM-dd'),
+      },
+      preActionChecklist: {
+        ...claim.preActionChecklist,
+        ...checklist,
+        letterBeforeClaimSent: true,
+      },
+      status: 'letter_sent' as const,
+    };
+    await saveCurrentClaim(updatedClaim);
   };
 
   const toggleChecklistItem = (item: keyof typeof checklist) => {
-    setChecklist((prev) => {
-      const updated = { ...prev, [item]: !prev[item] };
-      if (Object.values(updated).every(Boolean) && !updated.letterBeforeClaimSent) {
-        updated.letterBeforeClaimSent = true;
-      }
-      return updated;
+    const updated = { ...checklist, [item]: !checklist[item] };
+    setChecklist(updated);
+    ensureCurrentClaim().then((claim) => {
+      saveCurrentClaim({ ...claim, preActionChecklist: updated });
     });
   };
 

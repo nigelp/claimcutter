@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { useAppStore } from '../store';
 import {
   Calculator,
   FileText,
@@ -12,16 +13,34 @@ import {
 } from 'lucide-react';
 import {
   calculateTotalFees,
+  calculateHearingFee,
   FEE_BRACKETS,
-  HEARING_FEE_BRACKETS,
   getFeeLastUpdated,
 } from '../utils/feeCalculator';
 
 export default function FeeCalculatorPage() {
+  const { claims, currentClaimId, eligibilityAnswers } = useAppStore();
+  const currentClaim = useMemo(
+    () => claims.find((c) => c.id === currentClaimId),
+    [claims, currentClaimId],
+  );
+  const defaultAmount = currentClaim?.claimAmount || eligibilityAnswers.claimAmount || 0;
+  const defaultInterest = currentClaim?.interest?.calculatedAmount || 0;
+  const hasInitialized = useRef(false);
+
   const [claimAmount, setClaimAmount] = useState<string>('');
   const [interestAmount, setInterestAmount] = useState<string>('');
   const [submissionMethod, setSubmissionMethod] = useState<'online' | 'paper'>('online');
   const [showHelpWithFees, setShowHelpWithFees] = useState(false);
+
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      if (defaultAmount > 0) setClaimAmount(String(defaultAmount));
+      if (defaultInterest > 0) setInterestAmount(String(defaultInterest));
+      if (currentClaim?.submissionMethod) setSubmissionMethod(currentClaim.submissionMethod);
+      hasInitialized.current = true;
+    }
+  }, [defaultAmount, defaultInterest, currentClaim?.submissionMethod]);
 
   const numericClaimAmount = parseFloat(claimAmount) || 0;
   const numericInterestAmount = parseFloat(interestAmount) || 0;
@@ -193,9 +212,7 @@ export default function FeeCalculatorPage() {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {FEE_BRACKETS.map((bracket, index) => {
-                const hearingBracket = HEARING_FEE_BRACKETS.find(
-                  (h) => h.min === bracket.min && h.max === bracket.max
-                );
+                const hearingFee = calculateHearingFee(bracket.min);
                 const isActive =
                   totalClaim >= bracket.min && totalClaim <= bracket.max;
                 return (
@@ -222,7 +239,7 @@ export default function FeeCalculatorPage() {
                       £{bracket.paperFee.toFixed(2)}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-900 dark:text-white">
-                      {hearingBracket ? `£${hearingBracket.onlineFee.toFixed(2)}` : '-'}
+                      £{hearingFee.toFixed(2)}
                     </td>
                   </tr>
                 );

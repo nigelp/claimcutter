@@ -107,6 +107,7 @@ export default function ClaimBuilderPage() {
   });
 
   const { dirtyFields: claimantDirty } = claimantForm.formState;
+  const { dirtyFields: defendantDirty } = defendantForm.formState;
   const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set());
 
   const currentClaim = claims.find((c) => c.id === currentClaimId);
@@ -261,7 +262,7 @@ export default function ClaimBuilderPage() {
         }
         break;
       }
-      case 3:
+      case 3: {
         const amount = parseFloat(claimAmount);
         if (!claimAmount || isNaN(amount) || amount <= 0) {
           newErrors.claimAmount = 'Please enter a valid claim amount greater than 0';
@@ -270,6 +271,7 @@ export default function ClaimBuilderPage() {
           newErrors.claimAmount = 'Small claims track is for claims up to £10,000';
         }
         break;
+      }
       case 4:
         if (interestEnabled) {
           if (!interestStartDate) newErrors.interestStart = 'Start date is required for interest calculation';
@@ -326,6 +328,17 @@ export default function ClaimBuilderPage() {
     if (field.startsWith('address.')) {
       const addrKey = field.split('.')[1] as keyof typeof claimantDirty.address;
       return !!(claimantDirty.address && claimantDirty.address[addrKey]);
+    }
+    return false;
+  };
+
+  const isDefendantFieldDirty = (field: string): boolean => {
+    if (field === 'fullName') return !!defendantDirty.fullName;
+    if (field === 'phone') return !!defendantDirty.phone;
+    if (field === 'email') return !!defendantDirty.email;
+    if (field.startsWith('address.')) {
+      const addrKey = field.split('.')[1] as keyof typeof defendantDirty.address;
+      return !!(defendantDirty.address && defendantDirty.address[addrKey]);
     }
     return false;
   };
@@ -573,6 +586,7 @@ export default function ClaimBuilderPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   {defendantForm.watch('type') === 'company' ? 'Company Name' : 'Full Name'}
+                  <AutoFilledBadge isDirty={isDefendantFieldDirty('fullName')} wasAutoFilled={autoFilledFields.has('defendant.fullName')} />
                 </label>
                 <input
                   type="text"
@@ -588,6 +602,7 @@ export default function ClaimBuilderPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Address Line 1
+                  <AutoFilledBadge isDirty={isDefendantFieldDirty('address.line1')} wasAutoFilled={autoFilledFields.has('defendant.address.line1')} />
                 </label>
                 <input
                   type="text"
@@ -603,6 +618,7 @@ export default function ClaimBuilderPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Address Line 2 (Optional)
+                  <AutoFilledBadge isDirty={isDefendantFieldDirty('address.line2')} wasAutoFilled={autoFilledFields.has('defendant.address.line2')} />
                 </label>
                 <input
                   type="text"
@@ -616,6 +632,7 @@ export default function ClaimBuilderPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     City
+                    <AutoFilledBadge isDirty={isDefendantFieldDirty('address.city')} wasAutoFilled={autoFilledFields.has('defendant.address.city')} />
                   </label>
                   <input
                     type="text"
@@ -630,6 +647,7 @@ export default function ClaimBuilderPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Postcode
+                    <AutoFilledBadge isDirty={isDefendantFieldDirty('address.postcode')} wasAutoFilled={autoFilledFields.has('defendant.address.postcode')} />
                   </label>
                   <input
                     type="text"
@@ -646,6 +664,7 @@ export default function ClaimBuilderPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   County (Optional)
+                  <AutoFilledBadge isDirty={isDefendantFieldDirty('address.county')} wasAutoFilled={autoFilledFields.has('defendant.address.county')} />
                 </label>
                 <input
                   type="text"
@@ -658,6 +677,7 @@ export default function ClaimBuilderPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Phone (optional)
+                  <AutoFilledBadge isDirty={isDefendantFieldDirty('phone')} wasAutoFilled={autoFilledFields.has('defendant.phone')} />
                 </label>
                 <input
                   type="tel"
@@ -670,6 +690,7 @@ export default function ClaimBuilderPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Email (optional)
+                  <AutoFilledBadge isDirty={isDefendantFieldDirty('email')} wasAutoFilled={autoFilledFields.has('defendant.email')} />
                 </label>
                 <input
                   type="email"

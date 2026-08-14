@@ -13,7 +13,7 @@ if (storedDarkMode) {
     if (parsed.state?.darkMode !== undefined) {
       darkMode = parsed.state.darkMode;
     }
-  } catch (e) {
+  } catch {
     // ignore parse errors, keep default dark
   }
 }

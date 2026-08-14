@@ -11,7 +11,7 @@ const STATUS_FLOW: { status: ClaimStatus; label: string; description: string }[]
   { status: 'claim_submitted', label: 'Claim Submitted', description: 'Court is processing your claim' },
   { status: 'awaiting_response', label: 'Awaiting Response', description: 'Defendant has 14 days to respond' },
   { status: 'mediation', label: 'Mediation', description: 'Attempting to resolve through mediation' },
-  { status: 'hearing', label: 'Haring Scheduled', description: 'Your case will be heard in court' },
+  { status: 'hearing', label: 'Hearing Scheduled', description: 'Your case will be heard in court' },
   { status: 'judgment', label: 'Judgment', description: 'The court has made its decision' },
   { status: 'enforcement', label: 'Enforcement', description: 'Collecting the judgment amount' },
   { status: 'closed', label: 'Closed', description: 'This claim has been resolved' },
