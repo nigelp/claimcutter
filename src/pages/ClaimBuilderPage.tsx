@@ -194,7 +194,7 @@ export default function ClaimBuilderPage() {
         calculatedAmount: interestAmount,
       },
       particularsOfClaim: particulars,
-      courtFee: calculateCourtFee(parseFloat(claimAmount) || 0, 'online'),
+      courtFee: calculateCourtFee(parseFloat(claimAmount) || 0),
     };
     await saveCurrentClaim(claim);
     setIsSaving(false);
@@ -319,7 +319,7 @@ export default function ClaimBuilderPage() {
   };
 
   const totalClaim = (parseFloat(claimAmount) || 0) + interestAmount;
-  const courtFee = calculateCourtFee(totalClaim, 'online');
+  const courtFee = calculateCourtFee(totalClaim);
 
   const isClaimantFieldDirty = (field: string): boolean => {
     if (field === 'fullName') return !!claimantDirty.fullName;

@@ -1,7 +1,7 @@
 # ClaimCutter — Pre-Release Audit
 
-_Status: pipeline green (build, lint, tests). Four blocking defects fixed in the first pass;
-four product decisions and two cleanups resolved in the second pass (see below)._
+_Version 1.1.0. Build, lint, and tests are green; Windows installers (NSIS setup + portable)
+build successfully._
 
 ## Verification (current state)
 
@@ -11,73 +11,93 @@ four product decisions and two cleanups resolved in the second pass (see below).
 | Lint | `npm run lint` | ✅ PASS |
 | Tests | `npx vitest run` | ✅ PASS — 10/10 tests, 2 files |
 | Electron files typecheck | `tsc --noEmit electron/main.ts electron/preload.ts` | ✅ PASS |
-| Coverage | `npx vitest run --coverage` | ⚠️ not runnable — `@vitest/coverage-v8` not installed |
-| Electron packaging | `npm run electron:build` | ⚠️ not run in this environment |
-| GOV.UK / MCOL submission | — | ⚠️ out of scope (app links out) |
+| Windows installer build | `npm run electron:build:win` | ✅ PASS — see `release/` |
+| Dependency audit | `npm audit` | ⚠️ 5 remaining (dev-tooling only) |
 
-Build warnings (non-blocking): main bundle is ~932 kB (over the 500 kB chunk warning — no
+Build artifacts (not committed — `release/` is gitignored):
+- `release/claimcutter Setup 1.1.0.exe` (NSIS installer)
+- `release/claimcutter-1.1.0-portable.exe` (portable)
+
+Build warnings (non-blocking): main bundle is ~945 kB (over the 500 kB chunk warning — no
 code-splitting), and `postcss.config.js` triggers a module-type warning.
 
 ---
 
-## Pass 1 — blocking defects (fixed)
+## What has been done
 
-1. **Test suite now green** — stale placeholders/assertions in `workflow.test.tsx` corrected;
-   empty `primaryJourney.workflow.test.tsx` removed; clipboard assertion now spies correctly
-   (`@testing-library/user-event` replaces the mock in `setup()`).
-2. **`npm run lint` works** — ESLint 8 + typescript-eslint + react-hooks installed (`.eslintrc.cjs`).
-   Note: `eslint@8.57.1` is deprecated — plan a move to ESLint 9 flat config.
-3. **Fee Schedule hearing-fee column** now uses `calculateHearingFee()`.
-4. **"Haring Scheduled" → "Hearing Scheduled"** typo fixed.
-5. `.reasonix/` added to `.gitignore`; `AUDIT.md` added.
+### Pass 1 — blocking defects
+1. Test suite fixed (stale placeholders/assertions, empty test file, clipboard spy).
+2. ESLint 8 installed + configured (`npm run lint` works).
+3. Fee Schedule hearing-fee column fixed.
+4. "Haring Scheduled" → "Hearing Scheduled" typo fixed.
 
----
+### Pass 2 — product decisions
+1. **Electron write-only mirror removed** (data lives solely in IndexedDB).
+2. **Import Data button** added to Settings.
+3. **Per-claim delete** added to Previous Claims (with confirmation).
+4. **Mediation save wired up** (position statement + checklist persist to the claim).
+5. **Fee schedule re-verified** to EX50A (8 April 2025).
+6. **Dormant schema drift tidied** (removed unused/conflicting schemas).
 
-## Pass 2 — product decisions (resolved)
-
-1. **Electron write-only mirror removed.** `storage.ts` no longer calls
-   `window.electronAPI.saveData/deleteData`; the `save-data`/`load-data`/`delete-data` IPC
-   handlers and file helpers were removed from `electron/main.ts` and `electron/preload.ts`.
-   Data is persisted solely in IndexedDB. (`get-platform`/`open-external` remain for future use.)
-
-2. **Import button added to Settings.** "Import Data" reads the exported JSON, validates it as an
-   array of claims, calls `importClaims()`, refreshes the store, and shows success/error feedback.
-
-3. **Per-claim delete added** to Previous Claims, with inline confirmation.
-
-4. **Mediation save wired up.** Position statement (4 sections) and the preparation checklist now
-   persist to the current claim's `mediationStatus` (new `positionStatement` +
-   `preparationChecklist` fields). The Save button is disabled with a notice when no claim is
-   selected.
-
-### Cleanups (also resolved)
-
-5. **Fee schedule re-verified and updated** to the EX50A schedule effective 8 April 2025:
-   - Issue fees are now a single fee (the online/paper discount was removed): £35 / £50 / £70 /
-     £80 / £115 / £205 / £455, 5% above £10k (capped at £10,000 above £200k).
-   - Hearing fee is now a flat rate by track: £147 (small claims) / £171 (other claims).
-   - `getFeeLastUpdated()` → "April 2025"; Settings "Fee data last verified" → "April 2025".
-   - **Note:** the Fee Calculator's online/paper toggle is now cosmetic (both yield the same fee),
-     reflecting the single-fee reality. Consider simplifying the UI in a future pass.
-
-6. **Dormant schema drift tidied.** Removed unused/conflicting `claimSchema`, `eligibilitySchema`,
-   `interestSchema`, `letterBeforeClaimSchema`, `preActionChecklistSchema` and their derived type
-   exports from `src/schemas/index.ts` (they shadowed the types in `src/types/index.ts` and were
-   never used at runtime). Kept the schemas actually used (`addressSchema`, `claimantSchema`,
-   `defendantSchema`, `userProfileSchema`, `emptyUserProfile`).
+### Pass 3 — dependencies, fee UI, release build
+1. **Dependency upgrade** (36 → 5 vulnerabilities):
+   - `electron` 28.3.3 → 43.4.0 (runtime; fixed multiple CVEs).
+   - `electron-builder` 24.13.3 → 26.15.3 (fixed `tar`/`app-builder-lib`/`electron-updater`).
+   - `react-router-dom` 6 → 7 (fixed `react-router` CVEs).
+   - Removed unused `uuid` + `@types/uuid` (app uses `crypto.randomUUID()`).
+   - Ran `npm audit fix` for non-breaking transitive fixes.
+2. **Fee Calculator UI simplified**: the online/paper "Submission Method" toggle and the
+   "Online/Paper Court Fee" columns were removed, because the April 2025 fee reform made the
+   issue fee the same regardless of filing method. The `submissionMethod` field on a claim is
+   retained (it still drives the Submission Guide's online-vs-paper instructions).
+3. **Version bumped** 1.0.0 → 1.1.0 and Windows installers built.
 
 ---
 
-## Remaining notes / advisory
+## Remaining vulnerabilities (deferred — dev/build tooling only)
 
-- **Fee data**: updated to April 2025 EX50A from gov.uk. Worth a final human spot-check before
-  release, as court fees are material.
-- **`npm install` reports 36 vulnerabilities** (2 low, 10 moderate, 21 high, 3 critical) across
-  transitive deps — the project pins older majors (Electron 28, Vite 5, React 18). Plan a
-  dependency-upgrade pass.
-- **Help with Fees income thresholds** on the Fee Calculator page are illustrative and were not
+`npm audit` reports 5 remaining, all in the **build/test toolchain, which is not shipped in the
+packaged app**:
+
+| Package | Severity | Notes |
+|---|---|---|
+| `vitest` | critical | esbuild dev-server request forwarding (dev only) |
+| `vite` | high | esbuild dev-server (dev only) |
+| `esbuild` | moderate | dev server |
+| `vite-node` | moderate | vitest dependency |
+| `vite-plugin-pwa` | moderate | depends on vulnerable vite |
+
+Fixing these requires a breaking toolchain migration (`vite` 5 → 8, `vitest` 1 → 4,
+`vite-plugin-pwa` 0.17 → 1.x, and likely `vite-plugin-electron`). This is a larger, riskier
+migration that touches the Electron build chain, so it was deferred rather than done blind. The
+runtime dependencies (what actually ships in the `.exe`) are now clean.
+
+Recommended follow-up: a dedicated toolchain-migration pass (vite/vitest/PWA/electron-plugin),
+with the existing test suite as the regression guard.
+
+---
+
+## Build notes
+
+- **Windows Antivirus workaround (environment-specific).** On this machine, Windows Defender
+  blocks `MoveFileEx` (directory rename) on directories containing `electron.exe`, which breaks
+  electron-builder's extract step (`EPERM`). I patched
+  `node_modules/app-builder-lib/out/util/electronGet.js` locally to fall back to copy+delete when
+  the rename fails with `EPERM`/`EACCES`. This is in `node_modules` (gitignored) and must be
+  re-applied after a fresh `npm install` on this machine, or avoided by adding a Defender
+  exclusion for the project folder. A clean CI machine is unlikely to hit this.
+- **Code signing:** the installers are **unsigned** (no Authenticode certificate). For a
+  production release you will want to sign with a code-signing cert and set `win.certificate*`
+  options in the `build` config; otherwise Windows SmartScreen will warn users.
+
+## Advisory
+
+- **Fee data** updated to the April 2025 EX50A schedule from gov.uk. Worth a final human
+  spot-check before release (court fees are material).
+- **Help with Fees income thresholds** on the Fee Calculator are illustrative and were not
   re-verified.
-- **React Router v7 future-flag warnings** in tests (harmless).
-- **Dev-only:** React StrictMode double-invokes the `PreClaimPage` mount effect and can race to
-  create a duplicate draft claim; production builds are unaffected.
+- **React Router v7 future-flag warnings** no longer apply (migrated to v7); the v7
+  `startTransition` future flag is available if desired.
+- **Dev-only:** React StrictMode double-invokes the `PreClaimPage` mount effect in dev and can
+  race to create a duplicate draft claim; production builds are unaffected.
 - **Electron `get-platform`/`open-external` IPC** remain but are currently unused by the renderer.

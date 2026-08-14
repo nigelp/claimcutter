@@ -2,8 +2,6 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppStore } from '../store';
 import {
   Calculator,
-  FileText,
-  Monitor,
   HelpCircle,
   PoundSterling,
   CheckCircle,
@@ -30,24 +28,22 @@ export default function FeeCalculatorPage() {
 
   const [claimAmount, setClaimAmount] = useState<string>('');
   const [interestAmount, setInterestAmount] = useState<string>('');
-  const [submissionMethod, setSubmissionMethod] = useState<'online' | 'paper'>('online');
   const [showHelpWithFees, setShowHelpWithFees] = useState(false);
 
   useEffect(() => {
     if (!hasInitialized.current) {
       if (defaultAmount > 0) setClaimAmount(String(defaultAmount));
       if (defaultInterest > 0) setInterestAmount(String(defaultInterest));
-      if (currentClaim?.submissionMethod) setSubmissionMethod(currentClaim.submissionMethod);
       hasInitialized.current = true;
     }
-  }, [defaultAmount, defaultInterest, currentClaim?.submissionMethod]);
+  }, [defaultAmount, defaultInterest]);
 
   const numericClaimAmount = parseFloat(claimAmount) || 0;
   const numericInterestAmount = parseFloat(interestAmount) || 0;
 
   const feeBreakdown = useMemo(
-    () => calculateTotalFees(numericClaimAmount, numericInterestAmount, submissionMethod),
-    [numericClaimAmount, numericInterestAmount, submissionMethod]
+    () => calculateTotalFees(numericClaimAmount, numericInterestAmount),
+    [numericClaimAmount, numericInterestAmount]
   );
 
   const totalClaim = numericClaimAmount + numericInterestAmount;
@@ -108,36 +104,6 @@ export default function FeeCalculatorPage() {
               min="0"
               step="0.01"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Submission Method
-            </label>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setSubmissionMethod('online')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${
-                  submissionMethod === 'online'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                    : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                <Monitor className="w-5 h-5" />
-                Online
-              </button>
-              <button
-                onClick={() => setSubmissionMethod('paper')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${
-                  submissionMethod === 'paper'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                    : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                <FileText className="w-5 h-5" />
-                Paper
-              </button>
-            </div>
           </div>
         </div>
 
@@ -200,10 +166,7 @@ export default function FeeCalculatorPage() {
                   Claim Amount Range
                 </th>
                 <th className="px-4 py-3 text-right font-medium text-gray-500 dark:text-gray-400">
-                  Online Court Fee
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-500 dark:text-gray-400">
-                  Paper Court Fee
+                  Court Fee
                 </th>
                 <th className="px-4 py-3 text-right font-medium text-gray-500 dark:text-gray-400">
                   Hearing Fee
@@ -233,10 +196,7 @@ export default function FeeCalculatorPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-900 dark:text-white">
-                      £{bracket.onlineFee.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-900 dark:text-white">
-                      £{bracket.paperFee.toFixed(2)}
+                      £{bracket.fee.toFixed(2)}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-900 dark:text-white">
                       £{hearingFee.toFixed(2)}
@@ -248,7 +208,6 @@ export default function FeeCalculatorPage() {
                 <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
                   Over £10,000
                 </td>
-                <td className="px-4 py-3 text-right text-gray-900 dark:text-white">5%</td>
                 <td className="px-4 py-3 text-right text-gray-900 dark:text-white">5%</td>
                 <td className="px-4 py-3 text-right text-gray-900 dark:text-white">£171</td>
               </tr>
