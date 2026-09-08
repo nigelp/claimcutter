@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, FileText, Calculator, ListChecks, Scale, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Check, FileText, Calculator, ListChecks, Scale } from 'lucide-react';
 
 const features = [
   { icon: ListChecks, number: '01', title: 'Step-by-step guidance', description: 'Clear instructions from your first eligibility check through to the final court stage.' },
@@ -17,8 +17,8 @@ export const WelcomePage = () => {
         <div className="relative mx-auto grid max-w-7xl lg:grid-cols-[1.35fr_.65fr]">
           <div className="px-5 py-16 sm:px-10 sm:py-24 lg:px-14 lg:py-28 xl:pl-20">
             <span className="page-folio">A calmer route through small claims</span>
-            <h1 className="max-w-3xl font-headline text-[clamp(2.7rem,6vw,5.8rem)] font-bold leading-[.97] tracking-[-.065em] text-on-surface">Make your claim.<br /><span className="text-primary-600">Know every step.</span></h1>
-            <p className="mt-8 max-w-xl text-lg leading-8 text-on-surface-variant sm:text-xl">Practical, plain-English guidance for making a money claim in England and Wales—without losing sight of what comes next.</p>
+            <h1 className="max-w-3xl font-headline text-[clamp(2.7rem,6vw,5.8rem)] font-bold leading-[.97] tracking-[-.065em] text-on-surface">Make your claim.<br /><span className="text-primary-600">Step by step.</span></h1>
+            <p className="mt-8 max-w-xl text-lg leading-8 text-on-surface-variant sm:text-xl">Practical, plain-English guidance for making a money claim in England and Wales—we'll take you through it step by step.</p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <button onClick={() => navigate('/eligibility')} className="btn-primary px-7">Check your eligibility <ArrowRight className="h-4 w-4" /></button>
               <button onClick={() => navigate('/claims')} className="btn-secondary px-7">Open an existing claim</button>
@@ -27,9 +27,15 @@ export const WelcomePage = () => {
               {['Free to use', 'Saved on your device', 'No solicitor required'].map((item) => <span className="flex items-center gap-2" key={item}><Check className="h-3.5 w-3.5 text-primary-600" />{item}</span>)}
             </div>
           </div>
-          <aside className="flex flex-col justify-between border-t border-outline-variant/40 bg-surface-container-low px-5 py-10 sm:px-10 lg:border-l lg:border-t-0 lg:px-9 lg:py-20">
-            <div><span className="text-[10px] font-bold uppercase tracking-[.2em] text-on-surface-variant">Before you begin</span><div className="mt-5 h-px w-12 bg-primary-600" /><blockquote className="mt-8 font-headline text-2xl font-semibold leading-9 tracking-[-.035em]">“You do not need to know the whole process. You only need to know your next sound step.”</blockquote></div>
-            <div className="mt-14 border border-outline-variant/60 bg-surface-container-lowest p-5"><ShieldCheck className="h-6 w-6 text-primary-600" strokeWidth={1.6} /><h2 className="mt-4 text-sm font-bold">Private by design</h2><p className="mt-2 text-sm leading-6 text-on-surface-variant">Your claim information stays locally on this device. Nothing is sent to an external server.</p></div>
+          <aside className="relative min-h-48 overflow-hidden border-t border-outline-variant/40 bg-surface-container-low sm:min-h-64 lg:min-h-0 lg:border-l lg:border-t-0" aria-hidden="true">
+            <div className="absolute inset-x-[14%] inset-y-[16%] border border-outline-variant/35">
+              <div className="absolute left-[18%] top-0 h-full w-px bg-outline-variant/25" />
+              <div className="absolute left-0 top-[28%] h-px w-full bg-outline-variant/30" />
+              <div className="absolute left-0 top-[68%] h-px w-[72%] bg-outline-variant/30" />
+              <div className="absolute bottom-0 right-[18%] h-[72%] w-px bg-outline-variant/25" />
+              <div className="absolute left-[18%] top-[28%] h-px w-[38%] bg-primary-600/65" />
+              <div className="absolute left-[56%] top-[28%] h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary-600/70 bg-surface-container-low" />
+            </div>
           </aside>
         </div>
       </section>
