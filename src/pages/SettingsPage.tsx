@@ -115,7 +115,8 @@ export const SettingsPage = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
+        <span className="page-folio">Preferences &amp; privacy</span>
+        <h1 className="text-3xl sm:text-4xl font-bold text-on-surface">Settings</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">Manage your app preferences and data</p>
       </div>
 
@@ -131,8 +132,10 @@ export const SettingsPage = () => {
               <p className="text-sm text-gray-500 dark:text-gray-400">Switch between light and dark themes</p>
             </div>
             <button
-              className={`relative w-14 h-7 rounded-full transition-colors ${darkMode ? 'bg-primary-500' : 'bg-gray-300'}`}
+              className={`relative w-14 h-7 rounded-full transition-colors ${darkMode ? 'bg-primary-600' : 'bg-surface-container-highest'}`}
               onClick={() => setDarkMode(!darkMode)}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-pressed={darkMode}
             >
               <div className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white transition-transform ${darkMode ? 'translate-x-7' : ''}`}>
                 {darkMode ? <Moon className="w-4 h-4 m-1 text-primary-500" /> : <Sun className="w-4 h-4 m-1 text-amber-500" />}

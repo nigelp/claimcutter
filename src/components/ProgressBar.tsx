@@ -8,7 +8,7 @@ interface ProgressBarProps {
 }
 
 const colorStyles = {
-  blue: 'bg-blue-600',
+  blue: 'bg-primary-600',
   green: 'bg-green-600',
   amber: 'bg-amber-600',
   red: 'bg-red-600',
@@ -42,7 +42,7 @@ export const ProgressBar = ({
           )}
         </div>
       )}
-      <div className={`w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden ${sizeStyles[size]}`}>
+      <div className={`w-full bg-surface-container-high overflow-hidden ${sizeStyles[size]}`}>
         <div
           className={`${colorStyles[color]} ${sizeStyles[size]} rounded-full transition-all duration-300`}
           style={{ width: `${percentage}%` }}

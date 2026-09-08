@@ -126,7 +126,7 @@ export const useAppStore = create<AppState>()(
         claimType: '',
       },
       disclaimerAccepted: false,
-      darkMode: true,
+      darkMode: false,
       userProfile: null,
       
       setClaims: (claims) => set({ claims }),
@@ -143,6 +143,7 @@ export const useAppStore = create<AppState>()(
         } else {
           document.documentElement.classList.remove('dark');
         }
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#181613' : '#F7F4ED');
         saveSetting('darkMode', dark);
       },
       

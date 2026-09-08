@@ -9,9 +9,7 @@ interface InfoCardProps {
 
 const variantStyles = {
   default: {
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    iconBg: 'bg-blue-100 dark:bg-blue-900/40',
-    iconColor: 'text-blue-600 dark:text-blue-400',
+    bg: 'bg-primary-50', iconBg: 'bg-primary-100', iconColor: 'text-primary-600',
     titleColor: 'text-gray-900 dark:text-white',
     descColor: 'text-gray-600 dark:text-gray-400',
   },
@@ -30,9 +28,7 @@ const variantStyles = {
     descColor: 'text-gray-600 dark:text-gray-400',
   },
   info: {
-    bg: 'bg-purple-50 dark:bg-purple-900/20',
-    iconBg: 'bg-purple-100 dark:bg-purple-900/40',
-    iconColor: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-surface-container-low', iconBg: 'bg-surface-container', iconColor: 'text-primary-600',
     titleColor: 'text-gray-900 dark:text-white',
     descColor: 'text-gray-600 dark:text-gray-400',
   },
@@ -42,7 +38,7 @@ export const InfoCard = ({ icon: Icon, title, description, variant = 'default' }
   const styles = variantStyles[variant];
 
   return (
-    <div className={`p-4 rounded-xl ${styles.bg} border border-transparent dark:border-gray-700/50`}>
+    <div className={`p-5 rounded-md ${styles.bg} border border-outline-variant/40`}>
       <div className="flex items-start gap-3">
         <div className={`w-10 h-10 ${styles.iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
           <Icon className={`w-5 h-5 ${styles.iconColor}`} />

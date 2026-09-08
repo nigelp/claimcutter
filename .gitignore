@@ -1,9 +1,11 @@
 .qpanda/
 .reasonix/
+.dirac-cache/
 .netlify/
 node_modules/
 dist/
 dist-electron/
 release/
 coverage/
+warm-editorial-design/
 *.log

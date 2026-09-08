@@ -23,13 +23,13 @@ export const Tooltip = ({ content, children }: TooltipProps) => {
         aria-label={content}
         tabIndex={0}
       >
-        <Info className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+        <Info className="w-4 h-4 text-primary-600" />
       </span>
       {visible && (
-        <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg">
+        <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 border border-outline-variant bg-surface-container-lowest p-3 text-on-surface text-xs rounded-md shadow-lg">
           {content}
           <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-            <div className="w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45" />
+            <div className="w-2 h-2 bg-surface-container-lowest border-b border-r border-outline-variant rotate-45" />
           </div>
         </div>
       )}

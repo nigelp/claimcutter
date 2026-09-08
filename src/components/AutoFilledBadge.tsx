@@ -10,7 +10,7 @@ export function AutoFilledBadge({ isDirty, wasAutoFilled }: AutoFilledBadgeProps
 
   return (
     <span
-      className="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded"
+      className="inline-flex items-center gap-1 ml-2 border border-primary-600/20 bg-primary-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-600"
       title="Auto-filled from your saved details"
     >
       <Sparkles className="w-3 h-3" />
